@@ -35,6 +35,13 @@ def update(id: int, request: schemas.Blog, db: Session):
     return "Blog updated"
 
 
+def show(id: int, db: Session):
+    blog = db.query(models.Blog).filter(models.Blog.id == id).first()
+    if not blog:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
+    return blog
+
+
 def publish(id: int, db: Session):
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog.first():
@@ -42,14 +49,3 @@ def publish(id: int, db: Session):
     blog.update({models.Blog.status: "Published"}, synchronize_session=False)
     db.commit()
     return "Blog published"
-
-
-""""
-def add_comment(request: schemas.Show_Blog, db: Session):
-    user = db.query(models.User).filter(models.User.id == id)
-    if not user.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {id} does not exist")
-    user.update(request.dict(), synchronize_session=False)
-    db.commit()
-    return "Comment added"
-"""

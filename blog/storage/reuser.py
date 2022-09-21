@@ -5,7 +5,7 @@ from ..hashing import Hash
 
 
 def ucreate(request: schemas.User, db: Session):
-    new_user = models.User(name=request.name, email=request.email, password=Hash.bcrypt(request.password), is_active=request.is_active, role=request.role)
+    new_user = models.User(name=request.name, email=request.email, password=Hash.bcrypt(request.password), is_banned=False, role=request.role)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -19,10 +19,19 @@ def ushow(id: int, db: Session):
     return user
 
 
-def u_get_role(id: int, request: schemas.UserRole, db: Session):
+def u_get_ban(id: int, request: schemas.UserAdmin, db: Session):
     user = db.query(models.User).filter(models.User.id == id)
     if not user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {id} does not exist")
     user.update(request.dict(), synchronize_session=False)
     db.commit()
-    return "Role updated"
+    return "Settings for User updated"
+
+'''''
+def get_role(request: schemas.Roles, db: Session):
+    new_role = models.Roles(role=request.role, user_index=1)
+    db.add(new_role)
+    db.commit()
+    db.refresh(new_role)
+    return new_role
+'''

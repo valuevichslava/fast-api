@@ -13,7 +13,6 @@ class Blog(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
 
     creator = relationship("User", back_populates="blogs")
-    #comment = relationship("Comments", back_populates="post")
 
 
 class User(Base):
@@ -24,20 +23,18 @@ class User(Base):
     email = Column(String)
     password = Column(String)
     role = Column(String)
-    is_active = Column(Boolean)
+    is_banned = Column(Boolean)
 
     blogs = relationship("Blog", back_populates="creator")
-    #comm = relationship("Comments", back_populates="author")
+    #roles = relationship("Roles", back_populates="human")
 
-"""
-class Comments(Base):
-    __tablename__ = "comments"
+'''
+class Roles(Base):
+    __tablename__ = "roles"
 
     id = Column(Integer, primary_key=True, index=True)
-    body = Column(String)
-    blog_id = Column(Integer, ForeignKey("blogs.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    role = Column(String)
+    user_index = Column(Integer, ForeignKey("users.id"))
 
-    post = relationship("Blog", back_populates="comment")
-    author = relationship("User", back_populates="comm")
-"""
+    human = relationship("User", back_populates="roles")
+'''

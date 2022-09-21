@@ -3,14 +3,14 @@ from .. import schemas, database, models
 from typing import List
 from sqlalchemy.orm import Session
 from ..storage import repblog
-from ..oaut2 import get_current_user, check_admin, check_writer
+from ..oaut2 import get_current_user, check_admin, check_writer, check_ban
 
 router = APIRouter(prefix="/blog", tags=["For Blog"])
 
 get_db = database.get_db
 
 
-@router.get("/all", response_model=List[schemas.Show_Blog])
+@router.get("/all", response_model=List[schemas.Show_Blog], dependencies=[Depends(check_ban)])
 def all_blogs(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return repblog.get_all(db)
 
@@ -22,11 +22,6 @@ def create_blog(request: schemas.Blog, db: Session = Depends(get_db), current_us
 
 @router.delete("/delete/{id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(check_admin)])
 def delete_blog(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-    blog = db.query(models.Blog).filter(models.Blog.id == id)
-    if not blog.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
-    blog.delete(synchronize_session=False)
-    db.commit()
     return repblog.delete(id, db)
 
 
@@ -40,16 +35,7 @@ def publish_blog(id: int, db: Session = Depends(get_db), current_user: schemas.U
     return repblog.publish(id, db)
 
 
-@router.get("/{id}", status_code=200, response_model=schemas.Show_Blog)
+@router.get("/{id}", status_code=200, dependencies=[Depends(check_ban)])
 def get_blog(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-    blog = db.query(models.Blog).filter(models.Blog.id == id).first()
-    if not blog:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
     return repblog.show(id, db)
 
-
-"""""
-@router.put("comments/{id}/", status_code=status.HTTP_201_CREATED)
-def commenting(request: schemas.Show_Blog, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-    return repblog.add_comment(request, db)
-"""
