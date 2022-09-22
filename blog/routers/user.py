@@ -19,13 +19,12 @@ def get_user(id, db: Session = Depends(get_db), current_user: schemas.User = Dep
     return reuser.ushow(id, db)
 
 
-@router.put("/adminConsole/{id}", dependencies=[Depends(check_admin)])
-def give_role(id, request: schemas.UserAdmin, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+@router.put("/giveban/{id}", dependencies=[Depends(check_admin)])
+def give_ban(id, request: schemas.UserAdmin, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return reuser.u_get_ban(id, request, db)
 
-'''''
-@router.post("/addroles")
-def add_role(request: schemas.Roles, db: Session = Depends(get_db)):
-    print("Hello")
-    return reuser.get_role(request, db)
-'''
+
+@router.put("/giverole/{id}", dependencies=[Depends(check_admin)])
+def give_role(id, request: schemas.Roles, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return reuser.u_get_role(id, request, db)
+

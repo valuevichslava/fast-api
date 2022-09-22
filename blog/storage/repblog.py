@@ -3,13 +3,8 @@ from .. import models, schemas
 from fastapi import HTTPException, status
 
 
-def get_all(db: Session):
-    blogs = db.query(models.Blog).all()
-    return blogs
-
-
-def create(request: schemas.BlogDrawer, db: Session):
-    new_blog = models.Blog(title=request.title, body=request.body, user_id=1, status="Drawer")
+def create(request: schemas.Blog, db: Session):
+    new_blog = models.Blog(title=request.title, body=request.body, user_id=1, drawer=True)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
@@ -27,7 +22,7 @@ def delete(id: int, db: Session):
 
 
 def update(id: int, request: schemas.Blog, db: Session):
-    blog = db.query(models.Blog).filter(models.Blog.id == id)
+    blog = db.query(models.Blog).filter(models.Blog.id == id, models.Blog.drawer==True)
     if not blog.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
     blog.update(request.dict(), synchronize_session=False)
@@ -36,7 +31,7 @@ def update(id: int, request: schemas.Blog, db: Session):
 
 
 def show(id: int, db: Session):
-    blog = db.query(models.Blog).filter(models.Blog.id == id).first()
+    blog = db.query(models.Blog).filter(models.Blog.id == id, models.Blog.accepted == True).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
     return blog
@@ -46,6 +41,40 @@ def publish(id: int, db: Session):
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
-    blog.update({models.Blog.status: "Published"}, synchronize_session=False)
+    blog.update({models.Blog.published: True, models.Blog.drawer: False}, synchronize_session=False)
     db.commit()
     return "Blog published"
+
+
+def show_published(id: int, db: Session):
+    blog = db.query(models.Blog).filter(models.Blog.id == id, models.Blog.published == True).first()
+    if not blog:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
+    return blog
+
+
+def accept(id: int, db: Session):
+    blog = db.query(models.Blog).filter(models.Blog.id == id, models.Blog.published == True)
+    if not blog.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
+    blog.update({models.Blog.accepted: True, models.Blog.published: False}, synchronize_session=False)
+    db.commit()
+    return "Blog accepted"
+
+
+def reject(id: int, request: str, db: Session):
+    blog = db.query(models.Blog).filter(models.Blog.id == id, models.Blog.published == True)
+    if not blog.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
+    blog.update({models.Blog.moder_comm: request, models.Blog.rejected: True, models.Blog.published: False}, synchronize_session=False)
+    db.commit()
+    return "Blog rejected"
+
+
+def show_rejected(id: int, db: Session):
+    blog = db.query(models.Blog).filter(models.Blog.id == id, models.Blog.rejected == True).first()
+    if not blog:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Blog with id {id} does not exist")
+    return blog
+
+

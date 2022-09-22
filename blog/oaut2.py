@@ -22,21 +22,21 @@ def check_ban(token: str = Depends(oauth2_scheme)):
 
 
 def check_admin(claims:dict = Depends(check_ban)):
-    role = claims.get("role")
-    if role != "admin":
+    role = claims.get("adm")
+    if not role:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Allow only for admins", headers={"WWW-Authenticate": "Bearer"})
     return claims
 
 
 def check_moder(claims:dict = Depends(check_ban)):
-    role = claims.get("role")
-    if role != "moderator":
+    role = claims.get("moder")
+    if not role:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Allow only for moderators", headers={"WWW-Authenticate": "Bearer"})
     return claims
 
 
 def check_writer(claims:dict = Depends(check_ban)):
-    role = claims.get("role")
-    if role != "writer":
+    role = claims.get("writer")
+    if not role:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Allow only for writers", headers={"WWW-Authenticate": "Bearer"})
     return claims

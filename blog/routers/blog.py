@@ -1,18 +1,13 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from .. import schemas, database, models
-from typing import List
+from fastapi import APIRouter, Depends, status
+from .. import schemas, database
+from typing import List, Union
 from sqlalchemy.orm import Session
 from ..storage import repblog
-from ..oaut2 import get_current_user, check_admin, check_writer, check_ban
+from ..oaut2 import get_current_user, check_admin, check_writer, check_ban, check_moder
 
 router = APIRouter(prefix="/blog", tags=["For Blog"])
 
 get_db = database.get_db
-
-
-@router.get("/all", response_model=List[schemas.Show_Blog], dependencies=[Depends(check_ban)])
-def all_blogs(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-    return repblog.get_all(db)
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, dependencies=[Depends(check_writer)])
@@ -35,7 +30,26 @@ def publish_blog(id: int, db: Session = Depends(get_db), current_user: schemas.U
     return repblog.publish(id, db)
 
 
-@router.get("/{id}", status_code=200, dependencies=[Depends(check_ban)])
+@router.get("/{id}", status_code=200, response_model=schemas.Show_Blog, dependencies=[Depends(check_ban)])
 def get_blog(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
     return repblog.show(id, db)
 
+
+@router.get("/published/{id}", status_code=200, response_model=schemas.Show_Blog, dependencies=[Depends(check_moder)])
+def get_published(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return repblog.show_published(id, db)
+
+
+@router.put("/accept/{id}", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(check_moder)])
+def accept_blog(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return repblog.accept(id, db)
+
+
+@router.put("/reject/{id}", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(check_moder)])
+def reject_blog(id: int, request: str, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return repblog.reject(id, request, db)
+
+
+@router.get("/rejected/{id}", status_code=200, response_model=schemas.ShowReject, dependencies=[Depends(check_writer)])
+def get_rejected(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    return repblog.show_rejected(id, db)

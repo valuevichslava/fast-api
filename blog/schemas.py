@@ -14,18 +14,11 @@ class Blog(BlogBase):
         orm_mode = True
 
 
-class BlogDrawer(BlogBase):
-    status: str = "Drawer"
-
-    class Config():
-        orm_mode = True
-
-
-class Roles(str, Enum):
-    user = "user"
-    admin = "admin"
-    moderator = "moderator"
-    writer = "writer"
+class Roles(BaseModel):
+    user: bool = True
+    adm: bool = False
+    moder: bool = False
+    writer: bool = False
 
     class Config():
         orm_mode = True
@@ -33,7 +26,7 @@ class Roles(str, Enum):
 
 class UserAdmin(BaseModel):
     password: str
-    role: Roles
+    #role: Roles
     is_banned: bool = False
 
 
@@ -60,7 +53,16 @@ class Show_User(BaseModel):
 class Show_Blog(BaseModel):
     title: str
     body: str
-    creator: Show_User
+    #creator: Show_User
+
+    class Config():
+        orm_mode = True
+
+
+class ShowReject(BaseModel):
+    title: str
+    body: str
+    moder_comm: str
 
     class Config():
         orm_mode = True
