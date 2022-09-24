@@ -3,8 +3,8 @@ from .. import models, schemas
 from fastapi import HTTPException, status
 
 
-def create(request: schemas.Blog, db: Session):
-    new_blog = models.Blog(title=request.title, body=request.body, user_id=1, drawer=True)
+def create(request: schemas.Blog, db: Session, current_user: models.User):
+    new_blog = models.Blog(title=request.title, body=request.body, email_id=current_user.email, drawer=True)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)

@@ -1,22 +1,6 @@
 from .database import Base
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
-from sqlalchemy.orm import relationship
-
-
-class Blog(Base):
-    __tablename__ = "blogs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    body = Column(String)
-    drawer = Column(Boolean)
-    published = Column(Boolean, default=False)
-    accepted = Column(Boolean, default=False)
-    rejected = Column(Boolean, default=False)
-    moder_comm = Column(String)
-    user_id = Column(Integer, ForeignKey("users.id"))
-
-    creator = relationship("User", back_populates="blogs")
+from sqlalchemy.orm import relationship, Session
 
 
 class User(Base):
@@ -33,15 +17,24 @@ class User(Base):
     is_banned = Column(Boolean)
 
     blogs = relationship("Blog", back_populates="creator")
-    #roles = relationship("Roles", back_populates="human")
 
-'''
-class Roles(Base):
-    __tablename__ = "roles"
+
+class Blog(Base):
+    __tablename__ = "blogs"
 
     id = Column(Integer, primary_key=True, index=True)
-    role = Column(String)
-    user_index = Column(Integer, ForeignKey("users.id"))
+    title = Column(String)
+    body = Column(String)
+    drawer = Column(Boolean)
+    published = Column(Boolean, default=False)
+    accepted = Column(Boolean, default=False)
+    rejected = Column(Boolean, default=False)
+    moder_comm = Column(String)
+    email_id = Column(String)
+    user_id = Column(Integer, ForeignKey(User.id))
 
-    human = relationship("User", back_populates="roles")
-'''
+    creator = relationship("User", back_populates="blogs")
+
+
+def get_user(username: str, db: Session):
+    return db.query(User).filter(User.email == username).first()

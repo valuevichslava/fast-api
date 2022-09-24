@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
+from aenum import enum
 from jose import jwt, JWTError
-from . import schemas
+from . import schemas, models, database
+from sqlalchemy.orm import Session
+from fastapi import Depends
+
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -12,21 +16,30 @@ def create_access_token(data: dict):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    print("encoded_jwt="+encoded_jwt)
     return encoded_jwt
 
 
-def verify_token(token: str, credentials_exception):
+def verify_token(token: str, credentials_exception, db: Session):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("token="+token)
         email: str = payload.get("sub")
+        #id: str = payload.get("id")
         if email is None:
             raise credentials_exception
         token_data = schemas.TokenData(email=email)
     except JWTError:
         raise credentials_exception
+    user = models.get_user(username=token_data.email, db=db)
+    if user is None:
+        raise credentials_exception
+    return user
 
 
 def decode_token(token):
     claims = jwt.decode(token, key=SECRET_KEY)
     return claims
+
+
 
