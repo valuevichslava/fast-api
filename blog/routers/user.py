@@ -14,11 +14,6 @@ def create_user(request: schemas.User, db: Session = Depends(get_db)):
     return reuser.ucreate(request, db)
 
 
-@router.get("/{id}", response_model=schemas.Show_User, dependencies=[Depends(check_ban)])
-def get_user(id, db: Session = Depends(get_db)):
-    return reuser.ushow(id, db)
-
-
 @router.put("/giveban/{id}", dependencies=[Depends(check_admin)])
 def give_ban(id, request: schemas.UserAdmin, db: Session = Depends(get_db)):
     return reuser.u_get_ban(id, request, db)

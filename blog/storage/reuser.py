@@ -15,13 +15,6 @@ def ucreate(request: schemas.User, db: Session):
     return new_user
 
 
-def ushow(id: int, db: Session):
-    user = db.query(models.User).filter(models.User.id == id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {id} does not exist")
-    return user
-
-
 def u_get_ban(id: int, request: schemas.UserAdmin, db: Session):
     user = db.query(models.User).filter(models.User.id == id)
     if not user.first():

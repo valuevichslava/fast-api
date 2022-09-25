@@ -16,8 +16,6 @@ class User(Base):
     user = Column(Boolean)
     is_banned = Column(Boolean)
 
-    blogs = relationship("Blog", back_populates="creator")
-
 
 class Blog(Base):
     __tablename__ = "blogs"
@@ -31,9 +29,20 @@ class Blog(Base):
     rejected = Column(Boolean, default=False)
     moder_comm = Column(String)
     email_id = Column(String)
-    user_id = Column(Integer, ForeignKey(User.id))
+    comm = relationship("Comment", back_populates="blog")
 
-    creator = relationship("User", back_populates="blogs")
+
+class Comment(Base):
+    __tablename__ = "comments"
+    id = Column(Integer, primary_key=True)
+    content = Column(String)
+    blog_id = Column(Integer, ForeignKey("blogs.id"))
+    author_email = Column(String)
+    accepted = Column(Boolean, default=False)
+    consideration = Column(Boolean)
+    #rejected = Column(Boolean, default=False)
+
+    blog = relationship("Blog", back_populates="comm")
 
 
 def get_user(username: str, db: Session):

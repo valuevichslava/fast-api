@@ -50,10 +50,21 @@ class Show_User(BaseModel):
         orm_mode = True
 
 
+class CommentResp(BaseModel):
+    id: int
+    author_email: str
+    content: str
+    accepted: bool
+
+    class Config():
+        orm_mode = True
+
+
 class Show_Blog(BaseModel):
+    id: int
     title: str
     body: str
-    #creator: Show_User
+    comm: List[CommentResp] = []
 
     class Config():
         orm_mode = True
@@ -63,6 +74,13 @@ class ShowReject(BaseModel):
     title: str
     body: str
     moder_comm: str
+
+    class Config():
+        orm_mode = True
+
+
+class CommentForm(BaseModel):
+    body: str
 
     class Config():
         orm_mode = True
